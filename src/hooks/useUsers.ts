@@ -19,10 +19,10 @@ export function useUsers() {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     retry: (failureCount, error) => {
-      // Autentiserings- och behörighetsfel löses inte av ett nytt försök.
+      // Autentiserings-, behörighets- och kvotfel löses inte av ett nytt försök.
       if (
         error instanceof ApiError &&
-        [401, 403, 404].includes(error.status)
+        [401, 403, 404, 429].includes(error.status)
       ) {
         return false
       }
