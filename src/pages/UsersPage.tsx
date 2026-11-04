@@ -1,6 +1,7 @@
 ﻿import { useState } from 'react'
 import { useUsers } from '../hooks/useUsers'
 import type { User } from '../types/user'
+import { getErrorMessage } from '../utils/errors'
 import { StatusMessage } from '../components/StateViews/StatusMessage'
 import { UserList } from '../components/Users/UserList'
 import { SearchField } from '../components/Users/SearchField'
@@ -50,11 +51,7 @@ export function UsersPage() {
         <StatusMessage
           variant="error"
           title="Kunde inte hämta användare"
-          description={
-            error instanceof Error
-              ? error.message
-              : 'Ett okänt fel inträffade under hämtningen.'
-          }
+          description={getErrorMessage(error)}
           action={
             <button
               type="button"

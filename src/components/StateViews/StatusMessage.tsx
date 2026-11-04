@@ -13,8 +13,14 @@ export function StatusMessage({
   description,
   action,
 }: StatusMessageProps) {
+  const isError = variant === 'error'
+
   return (
-    <div className={`status status--${variant}`} role="status" aria-live="polite">
+    <div
+      className={`status status--${variant}`}
+      role={isError ? 'alert' : 'status'}
+      aria-live={isError ? 'assertive' : 'polite'}
+    >
       {variant === 'loading' && (
         <span className="status__spinner" aria-hidden="true" />
       )}
