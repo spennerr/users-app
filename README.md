@@ -18,6 +18,21 @@ React, TypeScript, Vite, react-router-dom och TanStack Query.
 
 ## Kravuppfyllelse
 
+### Uppgiftens checklista
+
+| Klart | Krav | Lösning |
+| --- | --- | --- |
+| ✅ | React SPA med TypeScript | React 19 + TypeScript med `strict: true` |
+| ✅ | react-router-dom med minst 2 sidor | Fyra rutter: översikt, lista, detalj och 404 |
+| ✅ | Navigationsmeny mellan sidorna | `src/components/Navigation/Navigation.tsx` |
+| ✅ | TanStack Query (useQuery) för datahämtning + cachning | `src/hooks/useUsers.ts` |
+| ✅ | API-anrop med header `x-api-key: elev-hemlighet-2026` | `src/api/client.ts` |
+| ✅ | Loading / error / empty states visuellt | `StatusMessage` och respektive sida |
+| ✅ | Strikt typade props | `interface ...Props` i alla komponenter som tar props |
+| ✅ | Modulär struktur och Separation of Concerns | `src/api`, `components`, `config`, `hooks`, `pages`, `types`, `utils` |
+| ✅ | Skydd mot fler än 100 anrop per dag | 30 min `staleTime`, 24 h `gcTime`, ingen refetch vid fokus/reconnect och ingen retry vid `429` |
+| ✅ | Git-repo med koden på `main` | All kod ligger på `main` och repot är kopplat till GitHub |
+
 ### G
 
 | Krav | Var det uppfylls |
