@@ -1,75 +1,146 @@
-# React + TypeScript + Vite
+# Användarportal
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+En React-applikation som hämtar användare från ett externt REST-API och visar
+dem i en responsiv, typad single page application. Projektet är byggt med
+React, TypeScript, Vite, react-router-dom och TanStack Query.
 
-Currently, two official plugins are available:
+## Funktioner
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Översikt** (`/`) med statistik om datamängden och en sammanfattning av de
+  tekniska valen.
+- **Användarlista** (`/users`) med sökning på namn, användarnamn, e-post, stad
+  och roll.
+- **Detaljvy** (`/users/:userId`) med kontaktuppgifter, inställningar och roller.
+- **404-sida** för adresser som inte finns.
+- Tydliga lägen för **laddning**, **fel** och **tomt dataset**, inklusive
+  möjlighet att försöka igen.
+- Responsiv design, tangentbordsvänlig navigering och stöd för mörkt läge.
 
-## React Compiler
+## Kravuppfyllelse
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### G
 
-## Expanding the ESLint configuration
+| Krav | Var det uppfylls |
+| --- | --- |
+| Minst 2 vyer med react-router-dom | `src/App.tsx` – fyra rutter: översikt, lista, detalj och 404 |
+| Använda useQuery | `src/hooks/useUsers.ts` |
+| Hantera tomma dataset | `src/pages/UsersPage.tsx`, `src/pages/OverviewPage.tsx` |
+| Hantera error från fetch | `src/api/client.ts`, `src/pages/UsersPage.tsx`, `src/pages/UserDetailPage.tsx` |
+| Bygga modulärt | `src/api`, `src/components`, `src/config`, `src/hooks`, `src/pages`, `src/types`, `src/utils` |
+| Versionshantering med Git | Repot har en beskrivande commit-historik och `.gitignore` |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### VG
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Krav | Var det uppfylls |
+| --- | --- |
+| Välstrukturerad navigering | `src/components/Navigation/Navigation.tsx` med `NavLink`, aktiv markering och gemensamma rutter i `src/config/routes.ts` |
+| Utförlig felhantering med friendly message | `src/api/client.ts` översätter HTTP-statusar, nätverksfel, tidsgränser och ogiltig JSON till svenska meddelanden. `src/utils/errors.ts` ser till att tekniska fel aldrig läcker ut i gränssnittet |
+| Välstrukturerat filsystem | Ett tydligt ansvar per mapp: API, komponenter, konfiguration, hooks, sidor, typer och verktygsfunktioner |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Teknikstack
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **React 19** och **TypeScript**
+- **Vite** för utvecklingsserver och bygge
+- **react-router-dom** för navigering
+- **TanStack Query** för hämtning, cachning och retry
+- **ESLint** med TypeScript- och React-regler
 
+## Kom igång
+
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Appen startar på adressen som Vite skriver ut, vanligtvis
+`http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Övriga kommandon:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run build   # typkontroll + produktionsbygge
+npm run lint    # ESLint
+npm run preview # förhandsgranska produktionsbygget
 ```
+
+### Miljövariabler
+
+Appen fungerar utan konfiguration eftersom kursens publika API-adress och
+demonyckel används som standard. Vill du peka mot en annan instans kan du skapa
+en `.env`-fil utifrån `.env.example`:
+
+```env
+VITE_API_BASE_URL=https://api-userapi.onrender.com/api
+VITE_API_KEY=elev-hemlighet-2026
+```
+
+`.env` är ignorerad av Git. Den inbyggda nyckeln är en publik demonyckel för
+kursen och ska inte behandlas som en riktig hemlighet.
+
+## API
+
+Appen anropar:
+
+```text
+GET https://api-userapi.onrender.com/api/users/getUsers
+Header: x-api-key: <nyckel>
+```
+
+API:et har två viktiga begränsningar:
+
+1. **Max 100 anrop per dygn.** Därför cachas svaret i 30 minuter och
+   bakgrundsrefetchning är avstängd.
+2. **Tjänsten kan sova.** Den ligger på Render och kan svara långsamt eller
+   med `503` när den startas. Appen visar då ett tydligt felmeddelande och en
+   knapp för att försöka igen.
+
+## Felhantering
+
+Alla anrop går genom `src/api/client.ts`. Där:
+
+- översätts HTTP-statusar (`401`, `403`, `404`, `429`, `5xx`) till begripliga
+  svenska meddelanden,
+- fångas nätverksfel och tidsgränser (15 sekunder),
+- kontrolleras att svaret är giltig JSON,
+- kastas ett `ApiError` med både ett användarvänligt meddelande och teknisk
+  information för felsökning.
+
+`src/api/users.ts` kontrollerar dessutom att svaret är en lista och att varje
+användare har de fält som appen kräver. På så sätt ger oväntad data ett tydligt
+fel i stället för en krasch i en komponent.
+
+## Mappstruktur
+
+```text
+src/
+├── api/            # HTTP-klient och API-anrop
+├── components/     # Återanvändbara komponenter
+│   ├── Navigation/
+│   ├── StateViews/ # Laddning, fel och tomt läge
+│   └── Users/
+├── config/         # Rutter och TanStack Query-konfiguration
+├── hooks/          # useUsers
+├── pages/          # En fil per vy
+├── types/          # Typer för API-data
+└── utils/          # Formatering och felmeddelanden
+```
+
+## Tekniska val
+
+- **react-router-dom** valdes för att appen ska ha riktiga URL:er som går att
+  dela och bokmärka. `NavLink` ger aktiv markering och 404-rutten fångar okända
+  adresser.
+- **TanStack Query** valdes i stället för `useEffect` + `useState` eftersom det
+  ger cachning, retry, avbrytbara anrop och tydliga `isPending`/`isError`-lägen
+  utan egen bokföring.
+- **Centrala rutter** i `src/config/routes.ts` gör att navigering och länkar
+  använder samma sökvägar.
+- **Runtime-kontroll av API-data** gör felhanteringen komplett: TypeScript
+  skyddar vid utveckling, kontrollen skyddar vid körning.
+- **Aggressiv cachning** är ett medvetet val för att skydda API:ets
+  anropsgräns.
+
+## Git
+
+Projektet versionshanteras med Git. `node_modules`, `dist` och lokala
+miljöfiler är undantagna i `.gitignore`.
