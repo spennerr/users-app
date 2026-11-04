@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { ROUTE_PATHS } from '../config/routes'
 
 export function NotFoundPage() {
   return (
@@ -10,7 +11,7 @@ export function NotFoundPage() {
             Adressen du besöker finns inte i applikationen.
           </p>
         </div>
-        <Link className="button" to="/">
+        <Link className="button" to={ROUTE_PATHS.overview}>
           Till översikten
         </Link>
       </div>

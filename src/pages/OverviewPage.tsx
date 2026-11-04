@@ -1,10 +1,15 @@
 import { Link } from 'react-router-dom'
 import { API_KEY_HEADER } from '../api/client'
 import { USERS_ENDPOINT } from '../api/users'
-import { queryCachePolicy, useUsers } from '../hooks/useUsers'
+import { CACHE_POLICY } from '../config/queryClient'
+import { ROUTE_PATHS } from '../config/routes'
+import { useUsers } from '../hooks/useUsers'
+import { getErrorMessage } from '../utils/errors'
+import { StatusMessage } from '../components/StateViews/StatusMessage'
 
 export function OverviewPage() {
-  const { data, isPending, isError } = useUsers()
+  const { data, isPending, isError, error, refetch } = useUsers()
+  const users = data ?? []
 
   return (
     <section className="page">
@@ -20,7 +25,7 @@ export function OverviewPage() {
         <article className="stat">
           <h2>Användare i datamängden</h2>
           <p className="stat__value">
-            {isPending ? '…' : isError ? 'Ej tillgängligt' : (data?.length ?? 0)}
+            {isPending ? '…' : isError ? 'Ej tillgängligt' : users.length}
           </p>
         </article>
         <article className="stat">
@@ -38,10 +43,44 @@ export function OverviewPage() {
         <article className="stat">
           <h2>Cachetid</h2>
           <p className="stat__value stat__value--small">
-            {queryCachePolicy.staleTimeMinutes} minuter
+            {Math.round(CACHE_POLICY.staleTimeMs / 60_000)} minuter
           </p>
         </article>
       </div>
+
+      {isError && (
+        <StatusMessage
+          variant="error"
+          title="Kunde inte hämta översikten"
+          description={getErrorMessage(error)}
+          action={
+            <button
+              type="button"
+              className="button"
+              onClick={() => void refetch()}
+            >
+              Försök igen
+            </button>
+          }
+        />
+      )}
+
+      {!isPending && !isError && users.length === 0 && (
+        <StatusMessage
+          variant="empty"
+          title="Inga användare att visa"
+          description="API:et returnerade en tom lista. Försök igen om du förväntar dig data."
+          action={
+            <button
+              type="button"
+              className="button"
+              onClick={() => void refetch()}
+            >
+              Försök igen
+            </button>
+          }
+        />
+      )}
 
       <section className="panel">
         <h2>Tekniska val</h2>
@@ -51,7 +90,7 @@ export function OverviewPage() {
           <li>Strikt typning med TypeScript för props och API-svar.</li>
           <li>Modulära komponenter med tydligt separerade ansvar.</li>
         </ul>
-        <Link className="button" to="/users">
+        <Link className="button" to={ROUTE_PATHS.users}>
           Till användarlistan
         </Link>
       </section>

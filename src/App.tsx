@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { Navigation } from './components/Navigation/Navigation'
+import { ROUTE_PATHS } from './config/routes'
 import { OverviewPage } from './pages/OverviewPage'
 import { UsersPage } from './pages/UsersPage'
 import { UserDetailPage } from './pages/UserDetailPage'
@@ -11,9 +12,9 @@ export default function App() {
       <Navigation />
       <main className="app__main">
         <Routes>
-          <Route path="/" element={<OverviewPage />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/users/:userId" element={<UserDetailPage />} />
+          <Route path={ROUTE_PATHS.overview} element={<OverviewPage />} />
+          <Route path={ROUTE_PATHS.users} element={<UsersPage />} />
+          <Route path={ROUTE_PATHS.userDetail} element={<UserDetailPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>

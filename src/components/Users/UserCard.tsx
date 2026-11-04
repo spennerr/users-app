@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { userDetailPath } from '../../config/routes'
 import type { User } from '../../types/user'
 import { getActiveNotifications, getInitials } from '../../utils/userFormatting'
 
@@ -37,7 +38,7 @@ export function UserCard({ user }: UserCardProps) {
         </div>
       </dl>
 
-      <Link className="card__link" to={`/users/${user.id}`}>
+      <Link className="card__link" to={userDetailPath(user.id)}>
         Visa detaljer
       </Link>
     </li>

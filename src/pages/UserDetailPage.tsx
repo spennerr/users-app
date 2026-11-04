@@ -1,5 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useUsers } from '../hooks/useUsers'
+import { ROUTE_PATHS } from '../config/routes'
+import { getErrorMessage } from '../utils/errors'
 import { StatusMessage } from '../components/StateViews/StatusMessage'
 import {
   formatTheme,
@@ -29,7 +31,7 @@ export function UserDetailPage() {
         <StatusMessage
           variant="error"
           title="Kunde inte hämta användare"
-          description={error instanceof Error ? error.message : 'Ett okänt fel inträffade.'}
+          description={getErrorMessage(error)}
           action={
             <button type="button" className="button" onClick={() => void refetch()}>
               Försök igen
@@ -50,7 +52,7 @@ export function UserDetailPage() {
           title="Användaren hittades inte"
           description={`Ingen användare med id ${userId ?? ''} finns i datamängden.`}
           action={
-            <Link className="button" to="/users">
+            <Link className="button" to={ROUTE_PATHS.users}>
               Tillbaka till listan
             </Link>
           }
@@ -64,7 +66,7 @@ export function UserDetailPage() {
 
   return (
     <section className="page">
-      <Link className="page__back" to="/users">
+      <Link className="page__back" to={ROUTE_PATHS.users}>
         ← Tillbaka till användare
       </Link>
 
