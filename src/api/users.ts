@@ -6,6 +6,8 @@ export const USERS_API_URL =
 const API_KEY = 'elev-hemlighet-2026'
 
 export async function fetchUsers(): Promise<User[]> {
+
+  try {
   const response = await fetch(USERS_API_URL, {
     headers: { 'x-api-key': API_KEY },
   })
@@ -20,5 +22,13 @@ export async function fetchUsers(): Promise<User[]> {
     throw new Error('Servern returnerade data i oväntat format.')
   }
 
-  return users as User[]
+  return users as User[] 
+  
+ } catch (error) {
+  if (error instanceof Error) {
+    throw new Error(`Kunde inte hämta användare: ${error.message}`)
+  } else {
+    throw new Error('Kunde inte hämta användare: Okänt fel.')
+  }
+ }
 }
