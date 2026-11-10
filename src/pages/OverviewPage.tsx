@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { USERS_API_URL } from '../api/users'
-import { StatusMessage } from '../components/StateViews/StatusMessage'
+import { StatusMessage } from '../components/StatusMessage'
 import { useUsers } from '../hooks/useUsers'
 
 export function OverviewPage() {
@@ -36,10 +36,6 @@ export function OverviewPage() {
             <code>x-api-key</code>
           </p>
         </article>
-        <article className="stat">
-          <h2>Cachetid</h2>
-          <p className="stat__value stat__value--small">30 minuter</p>
-        </article>
       </div>
 
       {isError && (
@@ -47,15 +43,7 @@ export function OverviewPage() {
           variant="error"
           title="Kunde inte hämta översikten"
           description={error.message}
-          action={
-            <button
-              type="button"
-              className="button"
-              onClick={() => void refetch()}
-            >
-              Försök igen
-            </button>
-          }
+          onRetry={refetch}
         />
       )}
 
@@ -64,15 +52,7 @@ export function OverviewPage() {
           variant="empty"
           title="Inga användare att visa"
           description="API:et returnerade en tom lista."
-          action={
-            <button
-              type="button"
-              className="button"
-              onClick={() => void refetch()}
-            >
-              Försök igen
-            </button>
-          }
+          onRetry={refetch}
         />
       )}
 

@@ -17,11 +17,12 @@ export async function fetchUsers(): Promise<User[]> {
   }
 
   if (!response.ok) {
-    throw new Error(
+    const message =
       response.status >= 500
         ? 'Servern är tillfälligt otillgänglig. Försök igen om en stund.'
-        : `Kunde inte hämta användare (status ${response.status}).`,
-    )
+        : `Kunde inte hämta användare (status ${response.status}).`
+
+    throw new Error(message)
   }
 
   const users: unknown = await response.json()

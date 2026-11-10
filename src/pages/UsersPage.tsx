@@ -1,7 +1,6 @@
 ﻿import { useState } from 'react'
-import { StatusMessage } from '../components/StateViews/StatusMessage'
-import { SearchField } from '../components/Users/SearchField'
-import { UserCard } from '../components/Users/UserCard'
+import { StatusMessage } from '../components/StatusMessage'
+import { UserCard } from '../components/UserCard'
 import { useUsers } from '../hooks/useUsers'
 
 export function UsersPage() {
@@ -38,15 +37,7 @@ export function UsersPage() {
           variant="error"
           title="Kunde inte hämta användare"
           description={error.message}
-          action={
-            <button
-              type="button"
-              className="button"
-              onClick={() => void refetch()}
-            >
-              Försök igen
-            </button>
-          }
+          onRetry={refetch}
         />
       )}
 
@@ -55,26 +46,28 @@ export function UsersPage() {
           variant="empty"
           title="Inga användare"
           description="API:et returnerade en tom lista."
-          action={
-            <button
-              type="button"
-              className="button"
-              onClick={() => void refetch()}
-            >
-              Försök igen
-            </button>
-          }
+          onRetry={refetch}
         />
       )}
 
       {data && users.length > 0 && (
         <>
-          <SearchField
-            value={search}
-            onChange={setSearch}
-            resultCount={visibleUsers.length}
-            totalCount={users.length}
-          />
+          <div className="search">
+            <label className="search__label" htmlFor="search">
+              Sök användare
+            </label>
+            <input
+              id="search"
+              className="search__input"
+              type="search"
+              value={search}
+              placeholder="Namn, användarnamn, stad eller roll"
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            <p className="search__count">
+              Visar {visibleUsers.length} av {users.length} användare
+            </p>
+          </div>
 
           {visibleUsers.length === 0 ? (
             <StatusMessage

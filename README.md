@@ -72,30 +72,32 @@ Nyckeln är kursens publika demonyckel och ligger i `src/api/users.ts`.
 
 ```text
 src/
-├── api/users.ts                 # API-adress, nyckel och fetchUsers
+├── api/users.ts           # API-adress, nyckel och fetchUsers
 ├── components/
-│   ├── Navigation/              # Meny
-│   ├── StateViews/              # Laddar, fel och tomt
-│   └── Users/                   # Sökfält och användarkort
-├── hooks/useUsers.ts            # useQuery
-├── pages/                       # En fil per vy
-├── types/user.ts                # Typen User
-├── utils/userFormatting.ts      # Initialer och notiser
-├── App.tsx                      # Rutter
-└── main.tsx                     # Start och providers
+│   ├── StatusMessage.tsx  # Laddar, fel och tomt
+│   └── UserCard.tsx       # Ett användarkort
+├── hooks/useUsers.ts      # useQuery
+├── pages/                 # En fil per vy
+├── types/user.ts          # Typen User
+├── App.tsx                # Meny och rutter
+├── index.css              # All styling
+└── main.tsx               # Start, QueryClient och Router
 ```
+
+Elva källfiler totalt: tre sidor, två komponenter, en hook, en API-fil, en
+typfila, `App`, `main` och CSS.
 
 ## Kravuppfyllelse (G)
 
 | Krav | Lösning |
 | --- | --- |
 | React SPA med TypeScript | React 19 och TypeScript med `strict: true` |
-| react-router-dom med minst 2 sidor | Fyra rutter i `src/App.tsx` |
-| Navigationsmeny | `src/components/Navigation/Navigation.tsx` |
+| react-router-dom med minst 2 sidor | Tre sidor + 404 i `src/App.tsx` |
+| Navigationsmeny | `NavLink` i `src/App.tsx` |
 | `useQuery` för datahämtning och cachning | `src/hooks/useUsers.ts` |
 | API-anrop med `x-api-key` | `src/api/users.ts` |
 | Loading-, error- och empty-states | `StatusMessage` och respektive sida |
-| Modulär struktur | `api`, `components`, `hooks`, `pages`, `types`, `utils` |
+| Modulär struktur | `api`, `components`, `hooks`, `pages`, `types` |
 | Git och versionshantering | Koden ligger på `main` |
 
 ## Tekniska val

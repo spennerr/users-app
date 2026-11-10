@@ -1,7 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
-import { StatusMessage } from '../components/StateViews/StatusMessage'
+import { StatusMessage } from '../components/StatusMessage'
 import { useUsers } from '../hooks/useUsers'
-import { getActiveNotifications, getInitials } from '../utils/userFormatting'
 
 export function UserDetailPage() {
   const { userId } = useParams<{ userId: string }>()
@@ -26,15 +25,7 @@ export function UserDetailPage() {
           variant="error"
           title="Kunde inte hämta användare"
           description={error.message}
-          action={
-            <button
-              type="button"
-              className="button"
-              onClick={() => void refetch()}
-            >
-              Försök igen
-            </button>
-          }
+          onRetry={refetch}
         />
       </section>
     )
@@ -61,7 +52,22 @@ export function UserDetailPage() {
   }
 
   const { profile, settings, roles } = user
-  const notifications = getActiveNotifications(user)
+  const { email, push } = settings.notifications
+
+  const notifications = [email && 'E-post', push && 'Push']
+    .filter(Boolean)
+    .join(' & ')
+
+  const rows = [
+    ['E-post', profile.email],
+    [
+      'Adress',
+      `${profile.address.street}, ${profile.address.zipCode} ${profile.address.city}`,
+    ],
+    ['Tema', settings.theme === 'dark' ? 'Mörkt läge' : 'Ljust läge'],
+    ['Aktiva notiser', notifications || 'Inga'],
+    ['Roller', roles.join(', ')],
+  ]
 
   return (
     <section className="page">
@@ -71,7 +77,7 @@ export function UserDetailPage() {
 
       <header className="detail__header">
         <span className="detail__avatar" aria-hidden="true">
-          {getInitials(profile.name)}
+          {profile.name[0].toUpperCase()}
         </span>
         <div>
           <h1>{profile.name}</h1>
@@ -79,46 +85,17 @@ export function UserDetailPage() {
         </div>
       </header>
 
-      <div className="detail__body">
-        <section className="panel">
-          <h2>Kontaktuppgifter</h2>
-          <dl className="detail__list">
-            <div>
-              <dt>E-post</dt>
-              <dd>{profile.email}</dd>
+      <section className="panel">
+        <h2>Uppgifter</h2>
+        <dl className="detail__list">
+          {rows.map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
             </div>
-            <div>
-              <dt>Adress</dt>
-              <dd>
-                {profile.address.street}, {profile.address.zipCode}{' '}
-                {profile.address.city}
-              </dd>
-            </div>
-          </dl>
-        </section>
-
-        <section className="panel">
-          <h2>Inställningar</h2>
-          <dl className="detail__list">
-            <div>
-              <dt>Tema</dt>
-              <dd>
-                {settings.theme === 'dark' ? 'Mörkt läge' : 'Ljust läge'}
-              </dd>
-            </div>
-            <div>
-              <dt>Aktiva notiser</dt>
-              <dd>
-                {notifications.length > 0 ? notifications.join(' & ') : 'Inga'}
-              </dd>
-            </div>
-            <div>
-              <dt>Roller</dt>
-              <dd>{roles.join(', ')}</dd>
-            </div>
-          </dl>
-        </section>
-      </div>
+          ))}
+        </dl>
+      </section>
     </section>
   )
 }
