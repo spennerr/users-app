@@ -174,11 +174,6 @@ code {
   text-decoration: underline;
 }
 
-.page__hint {
-  color: var(--text);
-  font-size: 0.9rem;
-}
-
 .button {
   display: inline-block;
   align-self: flex-start;
@@ -238,14 +233,7 @@ code {
 .stat__value--small {
   font-size: 1rem;
   font-weight: 500;
-}
-
-.feature-list {
-  margin: 0;
-  padding-left: 1.1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  overflow-wrap: anywhere;
 }
 
 .search {

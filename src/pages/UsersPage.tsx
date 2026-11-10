@@ -1,41 +1,27 @@
 ﻿import { useState } from 'react'
-import { useUsers } from '../hooks/useUsers'
-import type { User } from '../types/user'
-import { getErrorMessage } from '../utils/errors'
 import { StatusMessage } from '../components/StateViews/StatusMessage'
-import { UserList } from '../components/Users/UserList'
 import { SearchField } from '../components/Users/SearchField'
-
-function matchesQuery(user: User, query: string): boolean {
-  if (!query) return true
-
-  const haystack = [
-    user.profile.name,
-    user.username,
-    user.profile.address.city,
-    user.profile.email,
-    ...user.roles,
-  ]
-    .join(' ')
-    .toLowerCase()
-
-  return haystack.includes(query.toLowerCase())
-}
+import { UserCard } from '../components/Users/UserCard'
+import { useUsers } from '../hooks/useUsers'
 
 export function UsersPage() {
-  const { data, isPending, isError, error, refetch, isFetching } = useUsers()
+  const { data, isPending, isError, error, refetch } = useUsers()
   const [search, setSearch] = useState('')
 
   const users = data ?? []
-  const visibleUsers = users.filter((user) => matchesQuery(user, search))
+  const visibleUsers = users.filter((user) =>
+    `${user.profile.name} ${user.username} ${user.profile.email} ${user.profile.address.city} ${user.roles.join(' ')}`
+      .toLowerCase()
+      .includes(search.toLowerCase()),
+  )
 
   return (
     <section className="page">
       <header className="page__header">
         <h1>Användare</h1>
         <p>
-          Data hämtas från <code>api-userapi.onrender.com</code> och cachas med
-          TanStack Query för att skydda API:ets gräns på 100 anrop per dag.
+          Listan hämtas en gång från API:et och sparas i cachen. Sökningen sker
+          i webbläsaren.
         </p>
       </header>
 
@@ -43,7 +29,7 @@ export function UsersPage() {
         <StatusMessage
           variant="loading"
           title="Hämtar användare"
-          description="Anropar API:et för att hämta användardata."
+          description="Väntar på svar från API:et."
         />
       )}
 
@@ -51,7 +37,7 @@ export function UsersPage() {
         <StatusMessage
           variant="error"
           title="Kunde inte hämta användare"
-          description={getErrorMessage(error)}
+          description={error.message}
           action={
             <button
               type="button"
@@ -67,8 +53,8 @@ export function UsersPage() {
       {data && users.length === 0 && (
         <StatusMessage
           variant="empty"
-          title="Inga användare tillgängliga"
-          description="API:et returnerade en tom lista. Försök igen om du förväntar dig data."
+          title="Inga användare"
+          description="API:et returnerade en tom lista."
           action={
             <button
               type="button"
@@ -93,8 +79,8 @@ export function UsersPage() {
           {visibleUsers.length === 0 ? (
             <StatusMessage
               variant="empty"
-              title="Inga användare matchar din sökning"
-              description="Prova ett annat sökord eller rensa filtret."
+              title="Inga träffar"
+              description="Prova ett annat sökord."
               action={
                 <button
                   type="button"
@@ -106,15 +92,13 @@ export function UsersPage() {
               }
             />
           ) : (
-            <UserList users={visibleUsers} />
+            <ul className="grid">
+              {visibleUsers.map((user) => (
+                <UserCard key={user.id} user={user} />
+              ))}
+            </ul>
           )}
         </>
-      )}
-
-      {isFetching && !isPending && (
-        <p className="page__hint" role="status">
-          Uppdaterar data i bakgrunden…
-        </p>
       )}
     </section>
   )

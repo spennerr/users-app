@@ -29,5 +29,3 @@ export interface User {
   settings: UserSettings
   roles: string[]
 }
-
-export type UserRole = User['roles'][number]

@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { userDetailPath } from '../../config/routes'
 import type { User } from '../../types/user'
 import { getActiveNotifications, getInitials } from '../../utils/userFormatting'
 
@@ -34,11 +33,13 @@ export function UserCard({ user }: UserCardProps) {
         </div>
         <div>
           <dt>Notiser</dt>
-          <dd>{notifications.length > 0 ? notifications.join(' & ') : 'Avstängda'}</dd>
+          <dd>
+            {notifications.length > 0 ? notifications.join(' & ') : 'Avstängda'}
+          </dd>
         </div>
       </dl>
 
-      <Link className="card__link" to={userDetailPath(user.id)}>
+      <Link className="card__link" to={`/users/${user.id}`}>
         Visa detaljer
       </Link>
     </li>

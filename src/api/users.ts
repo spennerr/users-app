@@ -1,62 +1,34 @@
 import type { User } from '../types/user'
-import { ApiError, apiRequest } from './client'
 
-export const USERS_ENDPOINT = '/users/getUsers'
+export const USERS_API_URL =
+  'https://api-userapi.onrender.com/api/users/getUsers'
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null
-}
+const API_KEY = 'elev-hemlighet-2026'
 
-/**
- * Kontrollerar att svaret har den form som appen förväntar sig. Det gör att
- * oväntad data från API:et ger ett tydligt felmeddelande i stället för en krasch
- * inne i en komponent.
- */
-function isUser(value: unknown): value is User {
-  if (!isRecord(value) || !isRecord(value.profile) || !isRecord(value.settings)) {
-    return false
+export async function fetchUsers(): Promise<User[]> {
+  let response: Response
+
+  try {
+    response = await fetch(USERS_API_URL, {
+      headers: { 'x-api-key': API_KEY },
+    })
+  } catch {
+    throw new Error('Kunde inte nå servern. Kontrollera din internetanslutning.')
   }
 
-  const { profile, settings } = value
-  const address = profile.address
-  const notifications = settings.notifications
+  if (!response.ok) {
+    throw new Error(
+      response.status >= 500
+        ? 'Servern är tillfälligt otillgänglig. Försök igen om en stund.'
+        : `Kunde inte hämta användare (status ${response.status}).`,
+    )
+  }
 
-  return (
-    typeof value.id === 'number' &&
-    typeof value.username === 'string' &&
-    typeof profile.name === 'string' &&
-    typeof profile.email === 'string' &&
-    isRecord(address) &&
-    typeof address.street === 'string' &&
-    typeof address.city === 'string' &&
-    typeof address.zipCode === 'string' &&
-    (settings.theme === 'dark' || settings.theme === 'light') &&
-    isRecord(notifications) &&
-    typeof notifications.email === 'boolean' &&
-    typeof notifications.push === 'boolean' &&
-    Array.isArray(value.roles) &&
-    value.roles.every((role) => typeof role === 'string')
-  )
-}
-
-export async function fetchUsers(signal?: AbortSignal): Promise<User[]> {
-  const users = await apiRequest<unknown>(USERS_ENDPOINT, { signal })
+  const users: unknown = await response.json()
 
   if (!Array.isArray(users)) {
-    throw new ApiError(
-      'Servern returnerade data i ett oväntat format. Försök igen senare.',
-      0,
-      'Förväntade en lista med användare.',
-    )
+    throw new Error('Servern returnerade data i ett oväntat format.')
   }
 
-  if (!users.every(isUser)) {
-    throw new ApiError(
-      'Servern returnerade ofullständig användardata. Försök igen senare.',
-      0,
-      'Minst en användare saknade obligatoriska fält.',
-    )
-  }
-
-  return users
+  return users as User[]
 }

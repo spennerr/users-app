@@ -1,13 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
-import { useUsers } from '../hooks/useUsers'
-import { ROUTE_PATHS } from '../config/routes'
-import { getErrorMessage } from '../utils/errors'
 import { StatusMessage } from '../components/StateViews/StatusMessage'
-import {
-  formatTheme,
-  getActiveNotifications,
-  getInitials,
-} from '../utils/userFormatting'
+import { useUsers } from '../hooks/useUsers'
+import { getActiveNotifications, getInitials } from '../utils/userFormatting'
 
 export function UserDetailPage() {
   const { userId } = useParams<{ userId: string }>()
@@ -19,7 +13,7 @@ export function UserDetailPage() {
         <StatusMessage
           variant="loading"
           title="Hämtar användare"
-          description="Anropar API:et för att hämta användardata."
+          description="Väntar på svar från API:et."
         />
       </section>
     )
@@ -31,9 +25,13 @@ export function UserDetailPage() {
         <StatusMessage
           variant="error"
           title="Kunde inte hämta användare"
-          description={getErrorMessage(error)}
+          description={error.message}
           action={
-            <button type="button" className="button" onClick={() => void refetch()}>
+            <button
+              type="button"
+              className="button"
+              onClick={() => void refetch()}
+            >
               Försök igen
             </button>
           }
@@ -42,6 +40,7 @@ export function UserDetailPage() {
     )
   }
 
+  // Ingen ny hämtning: användaren letas upp i listan som redan ligger i cachen.
   const user = data?.find((candidate) => candidate.id === Number(userId))
 
   if (!user) {
@@ -50,9 +49,9 @@ export function UserDetailPage() {
         <StatusMessage
           variant="empty"
           title="Användaren hittades inte"
-          description={`Ingen användare med id ${userId ?? ''} finns i datamängden.`}
+          description={`Ingen användare med id ${userId ?? ''} finns i listan.`}
           action={
-            <Link className="button" to={ROUTE_PATHS.users}>
+            <Link className="button" to="/users">
               Tillbaka till listan
             </Link>
           }
@@ -66,7 +65,7 @@ export function UserDetailPage() {
 
   return (
     <section className="page">
-      <Link className="page__back" to={ROUTE_PATHS.users}>
+      <Link className="page__back" to="/users">
         ← Tillbaka till användare
       </Link>
 
@@ -103,11 +102,15 @@ export function UserDetailPage() {
           <dl className="detail__list">
             <div>
               <dt>Tema</dt>
-              <dd>{formatTheme(settings.theme)}</dd>
+              <dd>
+                {settings.theme === 'dark' ? 'Mörkt läge' : 'Ljust läge'}
+              </dd>
             </div>
             <div>
               <dt>Aktiva notiser</dt>
-              <dd>{notifications.length > 0 ? notifications.join(' & ') : 'Inga'}</dd>
+              <dd>
+                {notifications.length > 0 ? notifications.join(' & ') : 'Inga'}
+              </dd>
             </div>
             <div>
               <dt>Roller</dt>

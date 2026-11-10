@@ -1,64 +1,44 @@
 # Användarportal
 
-En React-applikation som hämtar användare från ett externt REST-API och visar
-dem i en responsiv, typad single page application. Projektet är byggt med
-React, TypeScript, Vite, react-router-dom och TanStack Query.
+En liten React-app som hämtar användare från ett externt REST-API och visar dem
+i en lista och en detaljvy. Byggd med React, TypeScript, Vite,
+react-router-dom och TanStack Query.
 
 ## Funktioner
 
-- **Översikt** (`/`) med statistik om datamängden och en sammanfattning av de
-  tekniska valen.
+- **Översikt** (`/`) med antal användare och information om API:et.
 - **Användarlista** (`/users`) med sökning på namn, användarnamn, e-post, stad
   och roll.
 - **Detaljvy** (`/users/:userId`) med kontaktuppgifter, inställningar och roller.
 - **404-sida** för adresser som inte finns.
-- Tydliga lägen för **laddning**, **fel** och **tomt dataset**, inklusive
-  möjlighet att försöka igen.
-- Responsiv design, tangentbordsvänlig navigering och stöd för mörkt läge.
+- Tydliga lägen för **laddning**, **fel** och **tomt** resultat.
+- Responsiv design och stöd för mörkt läge.
 
-## Kravuppfyllelse
+## Så fungerar det
 
-### Uppgiftens checklista
+```text
+URL
+ ↓
+App.tsx väljer sida
+ ↓
+Sidan anropar useUsers()
+ ↓
+useQuery hämtar med fetchUsers()
+ ↓
+fetch skickar x-api-key och får JSON
+ ↓
+TanStack Query cachar listan
+ ↓
+React visar den
+```
 
-| Klart | Krav | Lösning |
-| --- | --- | --- |
-| ✅ | React SPA med TypeScript | React 19 + TypeScript med `strict: true` |
-| ✅ | react-router-dom med minst 2 sidor | Fyra rutter: översikt, lista, detalj och 404 |
-| ✅ | Navigationsmeny mellan sidorna | `src/components/Navigation/Navigation.tsx` |
-| ✅ | TanStack Query (useQuery) för datahämtning + cachning | `src/hooks/useUsers.ts` |
-| ✅ | API-anrop med header `x-api-key: elev-hemlighet-2026` | `src/api/client.ts` |
-| ✅ | Loading / error / empty states visuellt | `StatusMessage` och respektive sida |
-| ✅ | Strikt typade props | `interface ...Props` i alla komponenter som tar props |
-| ✅ | Modulär struktur och Separation of Concerns | `src/api`, `components`, `config`, `hooks`, `pages`, `types`, `utils` |
-| ✅ | Skydd mot fler än 100 anrop per dag | 30 min `staleTime`, 24 h `gcTime`, ingen refetch vid fokus/reconnect och ingen retry vid `429` |
-| ✅ | Git-repo med koden på `main` | All kod ligger på `main` och repot är kopplat till GitHub |
-
-### G
-
-| Krav | Var det uppfylls |
-| --- | --- |
-| Minst 2 vyer med react-router-dom | `src/App.tsx` – fyra rutter: översikt, lista, detalj och 404 |
-| Använda useQuery | `src/hooks/useUsers.ts` |
-| Hantera tomma dataset | `src/pages/UsersPage.tsx`, `src/pages/OverviewPage.tsx` |
-| Hantera error från fetch | `src/api/client.ts`, `src/pages/UsersPage.tsx`, `src/pages/UserDetailPage.tsx` |
-| Bygga modulärt | `src/api`, `src/components`, `src/config`, `src/hooks`, `src/pages`, `src/types`, `src/utils` |
-| Versionshantering med Git | Repot har en beskrivande commit-historik och `.gitignore` |
-
-### VG
-
-| Krav | Var det uppfylls |
-| --- | --- |
-| Välstrukturerad navigering | `src/components/Navigation/Navigation.tsx` med `NavLink`, aktiv markering och gemensamma rutter i `src/config/routes.ts` |
-| Utförlig felhantering med friendly message | `src/api/client.ts` översätter HTTP-statusar, nätverksfel, tidsgränser och ogiltig JSON till svenska meddelanden. `src/utils/errors.ts` ser till att tekniska fel aldrig läcker ut i gränssnittet |
-| Välstrukturerat filsystem | Ett tydligt ansvar per mapp: API, komponenter, konfiguration, hooks, sidor, typer och verktygsfunktioner |
-
-## Teknikstack
-
-- **React 19** och **TypeScript**
-- **Vite** för utvecklingsserver och bygge
-- **react-router-dom** för navigering
-- **TanStack Query** för hämtning, cachning och retry
-- **ESLint** med TypeScript- och React-regler
+- `src/api/users.ts` innehåller API-adressen, API-nyckeln och `fetchUsers`.
+  Det är en vanlig `fetch` med felkontroll – ingen egen klient och ingen egen
+  cache.
+- `src/hooks/useUsers.ts` innehåller `useQuery` och dess inställningar. Det är
+  den enda platsen där data hämtas.
+- Listan och detaljvyn använder samma query key `['users']`. Därför läser
+  detaljvyn listan från cachen och gör inget nytt API-anrop.
 
 ## Kom igång
 
@@ -67,95 +47,61 @@ npm install
 npm run dev
 ```
 
-Appen startar på adressen som Vite skriver ut, vanligtvis
-`http://localhost:5173`.
-
-Övriga kommandon:
+Appen startar på `http://localhost:5173`.
 
 ```bash
 npm run build   # typkontroll + produktionsbygge
 npm run lint    # ESLint
-npm run preview # förhandsgranska produktionsbygget
+npm run preview # förhandsgranska bygget
 ```
-
-### Miljövariabler
-
-Appen fungerar utan konfiguration eftersom kursens publika API-adress och
-demonyckel används som standard. Vill du peka mot en annan instans kan du skapa
-en `.env`-fil utifrån `.env.example`:
-
-```env
-VITE_API_BASE_URL=https://api-userapi.onrender.com/api
-VITE_API_KEY=elev-hemlighet-2026
-```
-
-`.env` är ignorerad av Git. Den inbyggda nyckeln är en publik demonyckel för
-kursen och ska inte behandlas som en riktig hemlighet.
 
 ## API
 
-Appen anropar:
-
 ```text
 GET https://api-userapi.onrender.com/api/users/getUsers
-Header: x-api-key: <nyckel>
+Header: x-api-key: elev-hemlighet-2026
 ```
 
-API:et har två viktiga begränsningar:
+API:et tillåter **100 anrop per dygn**. Därför cachas listan i 30 minuter, ligger
+kvar i cachen i 24 timmar och hämtas inte om när fönstret får fokus. Vid ett
+tillfälligt serverfel visas ett meddelande och en knapp för att försöka igen.
 
-1. **Max 100 anrop per dygn.** Därför cachas svaret i 30 minuter och
-   bakgrundsrefetchning är avstängd.
-2. **Tjänsten kan sova.** Den ligger på Render och kan svara långsamt eller
-   med `503` när den startas. Appen visar då ett tydligt felmeddelande och en
-   knapp för att försöka igen.
+Nyckeln är kursens publika demonyckel och ligger i `src/api/users.ts`.
 
-## Felhantering
-
-Alla anrop går genom `src/api/client.ts`. Där:
-
-- översätts HTTP-statusar (`401`, `403`, `404`, `429`, `5xx`) till begripliga
-  svenska meddelanden,
-- fångas nätverksfel och tidsgränser (15 sekunder),
-- kontrolleras att svaret är giltig JSON,
-- kastas ett `ApiError` med både ett användarvänligt meddelande och teknisk
-  information för felsökning.
-
-`src/api/users.ts` kontrollerar dessutom att svaret är en lista och att varje
-användare har de fält som appen kräver. På så sätt ger oväntad data ett tydligt
-fel i stället för en krasch i en komponent.
-
-## Mappstruktur
+## Filstruktur
 
 ```text
 src/
-├── api/            # HTTP-klient och API-anrop
-├── components/     # Återanvändbara komponenter
-│   ├── Navigation/
-│   ├── StateViews/ # Laddning, fel och tomt läge
-│   └── Users/
-├── config/         # Rutter och TanStack Query-konfiguration
-├── hooks/          # useUsers
-├── pages/          # En fil per vy
-├── types/          # Typer för API-data
-└── utils/          # Formatering och felmeddelanden
+├── api/users.ts                 # API-adress, nyckel och fetchUsers
+├── components/
+│   ├── Navigation/              # Meny
+│   ├── StateViews/              # Laddar, fel och tomt
+│   └── Users/                   # Sökfält och användarkort
+├── hooks/useUsers.ts            # useQuery
+├── pages/                       # En fil per vy
+├── types/user.ts                # Typen User
+├── utils/userFormatting.ts      # Initialer och notiser
+├── App.tsx                      # Rutter
+└── main.tsx                     # Start och providers
 ```
+
+## Kravuppfyllelse (G)
+
+| Krav | Lösning |
+| --- | --- |
+| React SPA med TypeScript | React 19 och TypeScript med `strict: true` |
+| react-router-dom med minst 2 sidor | Fyra rutter i `src/App.tsx` |
+| Navigationsmeny | `src/components/Navigation/Navigation.tsx` |
+| `useQuery` för datahämtning och cachning | `src/hooks/useUsers.ts` |
+| API-anrop med `x-api-key` | `src/api/users.ts` |
+| Loading-, error- och empty-states | `StatusMessage` och respektive sida |
+| Modulär struktur | `api`, `components`, `hooks`, `pages`, `types`, `utils` |
+| Git och versionshantering | Koden ligger på `main` |
 
 ## Tekniska val
 
-- **react-router-dom** valdes för att appen ska ha riktiga URL:er som går att
-  dela och bokmärka. `NavLink` ger aktiv markering och 404-rutten fångar okända
-  adresser.
-- **TanStack Query** valdes i stället för `useEffect` + `useState` eftersom det
-  ger cachning, retry, avbrytbara anrop och tydliga `isPending`/`isError`-lägen
-  utan egen bokföring.
-- **Centrala rutter** i `src/config/routes.ts` gör att navigering och länkar
-  använder samma sökvägar.
-- **Runtime-kontroll av API-data** gör felhanteringen komplett: TypeScript
-  skyddar vid utveckling, kontrollen skyddar vid körning.
-- **Aggressiv cachning** är ett medvetet val för att skydda API:ets
-  anropsgräns.
-
-## Git
-
-Projektet versionshanteras med Git. `node_modules`, `dist` och lokala
-miljöfiler är undantagna i `.gitignore`.
+- **react-router-dom** ger riktiga URL:er som går att dela och bokmärka.
+- **TanStack Query** hanterar hämtning, cache, statusar och retry. Därför finns
+  ingen egen `useEffect`-lösning och ingen egen klient.
+- **`fetch`** är inbyggt i webbläsaren och räcker för ett enkelt GET-anrop.
+- **Cachning i 30 minuter** skyddar API:ets gräns på 100 anrop per dygn.
